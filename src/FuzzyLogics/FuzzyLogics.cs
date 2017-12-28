@@ -1,20 +1,24 @@
 ﻿/*
  * Created by SharpDevelop.
  * User: Шаркади Андрей
- * Date: 22.04.2010, 07.09.2010.
+ * Date: 
+ * 22.04.2010: написан начальный вариант кода;
+ * 08.09.2010: комбинирование (сравнение) множеств пересено из
+ * лингвистической переменной в множества - так логичней;
+ * 12.09.2010: дополнены комментарии к коду.
  */
 using System;
 using System.Collections;
 
 namespace FuzzyLogics
 {
-	/* =======================================
+	/* ====================================================
 	 * Класс <FuzzySet>	 
 	 * НЕЧЕТКОЕ МНОЖЕСТВО	 
 	 * Представляет собой нечеткое множество, как таковое.
 	 * Содержит элементы множества как пары Х-вероятность
 	 * (X неповторяется).
-	======================================== */
+	====================================================== */
 	public class FuzzySet
 	{
 		/* Имя множества и сортированный список элементов множества.
@@ -42,6 +46,7 @@ namespace FuzzyLogics
 			SetName = name;
 			foreach (aLine.aPoint point in points) Add(point.x, point.y);
 		}
+		
 		public FuzzySet (string name, params double[] assoc) 	// Четные элементы - Key, нечетные - Value
 		{
 			FuzzySetElements = new SortedList();
@@ -83,6 +88,8 @@ namespace FuzzyLogics
 		
 		public void Remove () { FuzzySetElements.Clear(); }
 		
+		// ПОЛУЧИТЬ НАБОР ЗНАЧЕНИЙ: возворащает массив, содержащий значения
+		// по оси Х.
 		public Array GetXset()
 		{
 			Array results = Array.CreateInstance(typeof(double), 
@@ -91,6 +98,8 @@ namespace FuzzyLogics
 			return results;
 		}
 		
+		// ПОЛУЧИТЬ НАБОР ВЕРОЯТНОСТЕЙ: возвращает массив, содержащий значения
+		// вероятностей.
 		public Array GetProbabilitySet() 
 		{ 
 			Array results = Array.CreateInstance(typeof(double),
@@ -99,6 +108,8 @@ namespace FuzzyLogics
 			return results;
 		}
 		
+		// СРАВНИТЬ ЗНАЧЕНИЯ: сравнивает колличество знаяений по оси Х двух
+		// нечетких множеств.
 		public bool EqualX (FuzzySet sourceX)
 		{
 			IList ElemX1, ElemX2;
@@ -155,6 +166,8 @@ namespace FuzzyLogics
 			return results;			
 		}
 	
+		// НЕЧЕТКОЕ И\ИЛИ: Логическое сравнение, И\ИЛИ 
+		// отличаются только базовым множеством.
 		private static SortedList FuzzyAndOr (int method, ArrayList lines1, ArrayList lines2, SortedList intrset, SortedList set1, SortedList set2)
 		{
 			SortedList resultset =  intrset;
@@ -202,6 +215,7 @@ namespace FuzzyLogics
 			return resultset;
 		}
 	
+		// Получить значение Х по максимальной вероятности (оси Y).
 		private static double GetSetMaxValKey (SortedList set)
 		{
 			double key = (double)set.GetByIndex(0);
@@ -212,7 +226,7 @@ namespace FuzzyLogics
 	}
 
 	
-	/* =======================================
+	/* ==================================================
 	 * Класс <LinguisticVariable>
 	 * ЛИНГВИСТИЧЕСКАЯ ПЕРЕМЕННАЯ
 	 * Содержит в себе нечеткое множество, являющееся
@@ -220,7 +234,7 @@ namespace FuzzyLogics
 	 * массив всех нечетких множеств (термов), их коли-
 	 * чество может быть любым, но не менее одного
 	 * (дублирует обасть определения самой л. п.).
-	======================================= */
+	==================================================== */
 	public class LinguisticVariable
 	{
 		internal  ArrayList LingVarTerms;
@@ -265,7 +279,9 @@ namespace FuzzyLogics
 				}}
 			return results;
 		}
-			
+		
+		// ДОБАВИТЬ В НАБОР НЕЧЕТКИХ МНОЖЕСТВ: добавляет нечеткое множество
+		// в набор нечетких множеств текущей лингвистической переменной.		
 		private void AddToSetOfFuzzySets (params FuzzySet[] sets)
 		{ foreach (FuzzySet elem in sets) { this.LingVarTerms.Add(elem); } }
 		
@@ -278,6 +294,9 @@ namespace FuzzyLogics
 				}}
 		}
 		
+		// КОМБИНИРОВАТЬ МНОЖЕСТВА: производит логическое сравнение 
+		// двух лингвистических переменных, аналогично методу из класса FuzzySet.
+		// Как результат, объединяет два множества в одно.
 		private static LinguisticVariable CombineSets (FuzzySet resultset, LinguisticVariable lvar1, LinguisticVariable lvar2)
 		{
 			LinguisticVariable results = new LinguisticVariable();
@@ -305,13 +324,13 @@ namespace FuzzyLogics
 	}
 	
 	
-	/* ======================================
+	/* ==================================================
 	 * Класс <ALine>
 	 * ЛИНИЯ
 	 * Основное назначение - разбитие множества на линии
 	 * и поиск точек их пересечения, обозначение области
 	 * определения двух множеств.
-	======================================= */
+	===================================================== */
 	public class aLine
 	{
 		public  const int PointAbove = 1;
@@ -411,7 +430,10 @@ namespace FuzzyLogics
 			}
 			return results;
 		}
-		
+	
+		// ПОЛУЧИТЬ ДИАПАЗОН ИЗ МНОЖЕСТВА: возвращает линию, являющуюся
+		// диапазаном всего множества, то есть содержит начальную и конечную
+		// точки изначального множества. Эта линия лежит на оси Х (т.е. Y=0).
 		public static aLine ExtractRangeFromSet (ArrayList lines) 
 		{
 			aLine first = (aLine)lines[0], last = (aLine)lines[lines.Count-1];
